@@ -57,17 +57,22 @@ traindata <- readdata("X_train.txt", "subject_train.txt","y_train.txt")
 
 setwd("../..")
 data <- rbind(testdata,traindata)
+
+varNames <- grep("mean\\(\\)|std\\(\\)",names(data),value=TRUE)
+write(varNames, "varNames.txt")
 desiredcolumns <- 
         c("activities",
           "subjects",
           grep("mean\\(\\)|std\\(\\)",names(data),value=TRUE))
 desireddatacols <- data[desiredcolumns]
+
 desireddata <-
         desireddatacols %>%
         split(list(desireddatacols$activities,desireddatacols$subjects)) %>%
         sapply(colMeans)
+		
 betternames <- colnames(desireddata) %>% sapply(makecolname)
 attr(betternames,"names") <- NULL
-colnames(desireddata) <- betternames
-outputdata <- desireddata[c(-1,-2),]
+outputdata <- cbind(varNames,desireddata[c(-1,-2),])
+colnames(outputdata) <- c("variable names",betternames)
 write.table(outputdata,file="output.txt",row.names=FALSE)
